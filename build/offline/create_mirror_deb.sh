@@ -5,7 +5,7 @@ export DISTRO=$(cat /etc/*-release|grep ^ID\=|awk -F\= {'print $2'}|sed s/\"//g)
 [[ -z ${MIRROR_OUTPUT_DIR} ]] && export MIRROR_OUTPUT_DIR=${PWD}/mirror-dist
 
 DEB_PACKAGE_LIST=$(<${MIRROR_BUILD_DIR}/pnda-deb-package-dependencies.txt)
-
+IPADDR=$(hostname -I | awk '{print $1}')
 export DEBIAN_FRONTEND=noninteractive
 SUITE=$(lsb_release -cs)
 DEB_REPO_DIR=$MIRROR_OUTPUT_DIR/mirror_deb/$SUITE
@@ -29,6 +29,8 @@ apt-get -y install $DEB_PACKAGE_LIST
 rm -rf $DEB_REPO_DIR
 mkdir -p $DEB_REPO_DIR
 cd $DEB_REPO_DIR
+echo "http://$IPADDR/mirror_deb/" > mirrors.txt
+wget -q -O - http://mirrors.ubuntu.com/mirrors.txt >> mirrors.txt
 apt-get download $DEB_PACKAGE_LIST
 for DEB_PACKAGE in $DEB_PACKAGE_LIST
 do
